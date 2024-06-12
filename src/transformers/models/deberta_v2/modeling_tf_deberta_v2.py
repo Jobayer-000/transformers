@@ -769,9 +769,9 @@ class TFDebertaV2DisentangledSelfAttention(keras.layers.Layer):
             scale_factor += 1
         scale = tf.math.sqrt(tf.cast(shape_list(query_layer)[-1] * scale_factor, tf.float32))
         attention_scores = tf.matmul(query_layer, tf.transpose(key_layer, [0, 2, 1]) / scale)
-        if self.relative_attention:
-            rel_embeddings = self.pos_dropout(rel_embeddings)
-            rel_att = self.disentangled_att_bias(query_layer, key_layer, relative_pos, rel_embeddings, scale_factor)
+        #if self.relative_attention:
+            #rel_embeddings = self.pos_dropout(rel_embeddings)
+            #rel_att = self.disentangled_att_bias(query_layer, key_layer, relative_pos, rel_embeddings, scale_factor)
 
         if rel_att is not None:
             attention_scores = attention_scores + rel_att
@@ -826,15 +826,15 @@ class TFDebertaV2DisentangledSelfAttention(keras.layers.Layer):
         rel_embeddings = tf.expand_dims(
             rel_embeddings[self.pos_ebd_size - att_span : self.pos_ebd_size + att_span, :], 0
         )
-        #if self.share_att_key:
-            #pos_query_layer = tf.tile(
-                #self.transpose_for_scores(self.query_proj(rel_embeddings), self.num_attention_heads),
-                #[shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
-            #)
-            #pos_key_layer = tf.tile(
-                #self.transpose_for_scores(self.key_proj(rel_embeddings), self.num_attention_heads),
-                #[shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
-            #)
+        if self.share_att_key:
+            pos_query_layer = tf.tile(
+                self.transpose_for_scores(self.query_proj(rel_embeddings), self.num_attention_heads),
+                [shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
+            )
+            pos_key_layer = tf.tile(
+                self.transpose_for_scores(self.key_proj(rel_embeddings), self.num_attention_heads),
+                [shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
+            )
         else:
             if "c2p" in self.pos_att_type:
                 pos_key_layer = tf.tile(
