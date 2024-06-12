@@ -579,8 +579,8 @@ def build_relative_position(query_size, key_size, bucket_size=-1, max_position=-
     q_ids = tf.range(query_size, dtype=tf.int32)
     k_ids = tf.range(key_size, dtype=tf.int32)
     rel_pos_ids = q_ids[:, None] - tf.tile(tf.expand_dims(k_ids, axis=0), [shape_list(q_ids)[0], 1])
-    if bucket_size > 0 and max_position > 0:
-        rel_pos_ids = make_log_bucket_position(rel_pos_ids, bucket_size, max_position)
+    #if bucket_size > 0 and max_position > 0:
+        #rel_pos_ids = make_log_bucket_position(rel_pos_ids, bucket_size, max_position)
     rel_pos_ids = rel_pos_ids[:query_size, :]
     rel_pos_ids = tf.expand_dims(rel_pos_ids, axis=0)
     return tf.cast(rel_pos_ids, tf.int64)
@@ -826,15 +826,15 @@ class TFDebertaV2DisentangledSelfAttention(keras.layers.Layer):
         rel_embeddings = tf.expand_dims(
             rel_embeddings[self.pos_ebd_size - att_span : self.pos_ebd_size + att_span, :], 0
         )
-        if self.share_att_key:
-            pos_query_layer = tf.tile(
-                self.transpose_for_scores(self.query_proj(rel_embeddings), self.num_attention_heads),
-                [shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
-            )
-            pos_key_layer = tf.tile(
-                self.transpose_for_scores(self.key_proj(rel_embeddings), self.num_attention_heads),
-                [shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
-            )
+        #if self.share_att_key:
+            #pos_query_layer = tf.tile(
+                #self.transpose_for_scores(self.query_proj(rel_embeddings), self.num_attention_heads),
+                #[shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
+            #)
+            #pos_key_layer = tf.tile(
+                #self.transpose_for_scores(self.key_proj(rel_embeddings), self.num_attention_heads),
+                #[shape_list(query_layer)[0] // self.num_attention_heads, 1, 1],
+            #)
         else:
             if "c2p" in self.pos_att_type:
                 pos_key_layer = tf.tile(
